@@ -27,7 +27,7 @@ El enfoque de este proyecto fue utilizar herramientas de React para crear una r�
 
 #### - La función createContext
 
-## Actualización
+#### Actualización
 
 En el sprint 15 al proyecto se le ha implementado el registro y autorización en el Frontend a través de una API.
 
