@@ -1,18 +1,22 @@
-@import "./vendor/normalize.css";
+@import './vendor/normalize.css';
 
-@import "./vendor/fonts/fonts.css";
+@import './vendor/fonts/fonts.css';
 
-@import "./blocks/page.css";
+@import './blocks/page.css';
 
-@import "./blocks/header.css";
+@import './blocks/header.css';
 
-@import "./blocks/profile.css";
+@import './blocks/profile.css';
 
-@import "./blocks/elements.css";
+@import './blocks/elements.css';
 
-@import "./blocks/footer.css";
+@import './blocks/footer.css';
 
-@import "./blocks/popup.css";
+@import './blocks/popup.css';
+
+@import './blocks/login.css';
+
+@import './blocks/register.css';
 
 /* body {
   margin: 0;

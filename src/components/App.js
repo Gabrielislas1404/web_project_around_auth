@@ -10,7 +10,10 @@ import PopupWithForm from './PopupWithForm';
 import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
-import { Route, Switch } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
+import ProtectedRoute from './ProtectedRoute';
+import { Route, Switch, Redirect, useHistory, Link } from 'react-router-dom';
 import * as auth from '../utils/auth';
 
 function App() {
@@ -22,6 +25,9 @@ function App() {
   const [cardToDelete, setCardToDelete] = useState({});
   const [currentUser, setCurrentUser] = useState();
   const [confirmation, setConfirmation] = useState(false);
+
+  const [isLogged, setIsLogged] = useState(false);
+  const [email, setEmail] = useState('');
 
   function handleCardDelete(card) {
     setCardToDelete(card);
@@ -105,54 +111,119 @@ function App() {
     }
   };
 
+  const logOutButton = () => {
+    localStorage.removeItem('jwt');
+    setCurrentUser({});
+    setIsLogged(false);
+    history.push('/login');
+  };
+
+  const history = useHistory();
+
+  useEffect(() => {
+    if (isLogged) {
+      api.getUserInfo().then((user) => {
+        setCurrentUser(user);
+        api.getInitialCards().then((cards) => {
+          setCards(cards);
+        });
+      });
+    }
+  }, [isLogged]);
+
+  useEffect(() => {
+    tokenExist();
+  }, []);
+
+  const tokenExist = () => {
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      auth
+        .getUserToken(jwt)
+        .then((res) => {
+          if (res) {
+            setIsLogged(true);
+            history.pushState('/home');
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+    return;
+  };
+
+  const handleLogin = (event) => {
+    event.preventDefault();
+    tokenExist();
+  };
+
   return (
-    <div className="page">
-      <CurrentUserContext.Provider value={{ currentUser }}>
-        <Header />
-        <Main
-          onEditAvatarClick={handleEditAvatarClick}
-          onEditProfileClick={handleEditProfileClick}
-          onAddPlaceClick={handleAddPlaceClick}
-          onCardClick={handleCardClick}
-          onClose={closeAllPopups}
-          cards={cards}
-          selectedCard={selectedCard}
-          onCardLike={handleCardLike}
-          onCardDelete={handleCardDelete}
-        />
+    <CurrentUserContext.Provider value={{ currentUser }}>
+      <div className="page">
+        <Switch>
+          <Route path="/Register">
+            <Register />
+          </Route>
+          <Route path="/Login" handleLogin={handleLogin}>
+            <Login
+              setIsLogged={setIsLogged}
+              email={email}
+              setEmail={setEmail}
+            ></Login>
+          </Route>
+          <ProtectedRoute logged={isLogged}>
+            <>
+              <Header email={email} logOutButton={logOutButton} />
+              <Main
+                onEditAvatarClick={handleEditAvatarClick}
+                onEditProfileClick={handleEditProfileClick}
+                onAddPlaceClick={handleAddPlaceClick}
+                onCardClick={handleCardClick}
+                onClose={closeAllPopups}
+                cards={cards}
+                selectedCard={selectedCard}
+                onCardLike={handleCardLike}
+                onCardDelete={handleCardDelete}
+              />
 
-        <EditProfilePopup
-          isOpen={isEditProfilePopupOpen}
-          onClose={closeAllPopups}
-          onUpdateUser={handleUpdateUser}
-        />
+              <EditProfilePopup
+                isOpen={isEditProfilePopupOpen}
+                onClose={closeAllPopups}
+                onUpdateUser={handleUpdateUser}
+              />
 
-        <EditAvatarPopup
-          isOpen={isEditAvatarPopupOpen}
-          onClose={closeAllPopups}
-          onUpdateAvatar={handleUpdateAvatar}
-        />
+              <EditAvatarPopup
+                isOpen={isEditAvatarPopupOpen}
+                onClose={closeAllPopups}
+                onUpdateAvatar={handleUpdateAvatar}
+              />
 
-        <AddPlacePopup
-          isOpen={isAddPlacePopupOpen}
-          onClose={closeAllPopups}
-          onAddPlaceSubmit={handleAddPlaceSubmit}
-        />
-        <PopupWithForm
-          name={'erase_photo'}
-          title={'¿Estás seguro/a?'}
-          buttonTitle={'Si'}
-          content={'card'}
-          buttonClass={'delete'}
-          modifier={'delete'}
-          isOpen={confirmation}
-          onClose={closeAllPopups}
-          onSubmit={handleSubmitConfirm}
-        />
+              <AddPlacePopup
+                isOpen={isAddPlacePopupOpen}
+                onClose={closeAllPopups}
+                onAddPlaceSubmit={handleAddPlaceSubmit}
+              />
 
-        <Footer />
-      </CurrentUserContext.Provider>
-    </div>
+              <PopupWithForm
+                name={'erase_photo'}
+                title={'¿Estás seguro/a?'}
+                buttonTitle={'Si'}
+                content={'card'}
+                buttonClass={'delete'}
+                modifier={'delete'}
+                isOpen={confirmation}
+                onClose={closeAllPopups}
+                onSubmit={handleSubmitConfirm}
+              />
+
+              <Footer />
+            </>
+          </ProtectedRoute>
+          <Route exact path="/">
+            {isLogged ? <Redirect to="/home" /> : <Redirect to="/register" />}
+          </Route>
+        </Switch>
+      </div>
+    </CurrentUserContext.Provider>
   );
 }
 

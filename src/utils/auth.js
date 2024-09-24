@@ -1,31 +1,64 @@
-const BASE_URL = '"https://register.nomoreparties.co";';
+export const BASE_URL = 'https://tripleten.desarrollointerno.com';
 
-export const register = (email, password) => {
-  return fetch(`${BASE_URL}/signup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  })
-    .then((data) => {
-      if (data.ok) {
-        return data.json();
-      }
-      return Promise.reject(`Error: ${data.status}`);
-    })
-    .catch((err) => console.error('Error:', err));
+export const register = async (email, password) => {
+  try {
+    const response = await fetch(`${BASE_URL}/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error:', err);
+    throw err;
+  }
 };
 
-export const authorize = (email, password) => {
-  return fetch(`${BASE_URL}/signin`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  })
-    .then((data) => {
-      if (data.ok) {
-        return data.json();
-      }
-      return Promise.reject(`Error: ${data.status}`);
-    })
-    .catch((err) => console.error('Error', err));
+export const login = async (email, password) => {
+  try {
+    const response = await fetch(`${BASE_URL}/signin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error:', err);
+    throw err;
+  }
+};
+
+export const getUserToken = async (token) => {
+  try {
+    const response = await fetch(`${BASE_URL}/users/me`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error:', err);
+    throw err;
+  }
 };
